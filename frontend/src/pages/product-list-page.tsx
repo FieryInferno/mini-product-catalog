@@ -2,18 +2,11 @@ import { Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { Pagination } from '@/components/pagination'
 import { ProductList } from '@/components/products/product-list'
 import { ProductDialog } from '@/components/products/product-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
 import { listProducts } from '@/lib/api'
 import { useDebounce } from '@/lib/use-debounce'
 import type { Product } from '@/types/product'
@@ -93,30 +86,14 @@ export function ProductListPage() {
         onEditProduct={(productId) => navigate(`/edit/${productId}`)}
       />
 
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious onClick={() => setPage((prev) => Math.max(1, prev - 1))} disabled={page === 1} />
-          </PaginationItem>
-          {pages.map((pageNumber) => (
-            <PaginationItem key={pageNumber}>
-              <PaginationLink
-                isActive={pageNumber === page}
-                onClick={() => setPage(pageNumber)}
-                disabled={pageNumber === page}
-              >
-                {pageNumber}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={page === totalPages}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        pages={pages}
+        onPrevious={() => setPage((prev) => Math.max(1, prev - 1))}
+        onNext={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+        onPageChange={setPage}
+      />
 
       <ProductDialog
         open={Boolean(selectedProduct)}
