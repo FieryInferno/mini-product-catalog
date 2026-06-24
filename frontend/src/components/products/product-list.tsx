@@ -5,7 +5,7 @@ import { ErrorAlert } from '@/components/alert'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { Product } from '@/types/product'
+import type { Product } from '@/models/product.model'
 
 const SKELETON_ITEMS = 8
 const CardProduct = lazy(() => import('@/components/product/CardProduct').then((module) => ({ default: module.CardProduct })))

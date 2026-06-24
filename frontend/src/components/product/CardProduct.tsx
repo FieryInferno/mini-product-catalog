@@ -2,7 +2,7 @@ import { format } from 'date-fns'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Product } from '@/types/product'
+import type { Product } from '@/models/product.model'
 
 type CardProductProps = {
   product: Product

@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import type { Product } from '@/types/product'
+import type { Product } from '@/models/product.model'
 
 type ProductDialogProps = {
   product: Product | null

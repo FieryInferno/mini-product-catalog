@@ -1,8 +1,26 @@
-import type { ApiError, Product, ProductListResponse, ProductPayload } from '@/types/product'
+import { z } from 'zod'
 
+import { productSchema } from '@/models/product.model'
+import type { ProductPayload } from '@/models/product.model'
+
+type ApiError = { message: string }
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export class ApiResponseValidationError extends Error {
+  readonly issues: z.ZodIssue[]
+
+  constructor(message: string, issues: z.ZodIssue[]) {
+    super(message)
+    this.name = 'ApiResponseValidationError'
+    this.issues = issues
+  }
+}
+
+export async function request<Schema extends z.ZodTypeAny>(
+  path: string,
+  schema: Schema,
+  init?: RequestInit,
+): Promise<z.infer<Schema>> {
   const response = await fetch(`${API_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
@@ -22,31 +40,34 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(message)
   }
 
-  return response.json() as Promise<T>
-}
+  const data: unknown = await response.json()
+  const parsed = schema.safeParse(data)
 
-export function listProducts(params: { search: string; page: number; limit: number }) {
-  const query = new URLSearchParams({
-    search: params.search,
-    page: String(params.page),
-    limit: String(params.limit),
-  })
-  return request<ProductListResponse>(`/api/products?${query.toString()}`)
+  if (!parsed.success) {
+    console.error('API response validation failed', {
+      path,
+      issues: parsed.error.issues,
+      data,
+    })
+    throw new ApiResponseValidationError('Invalid API response shape', parsed.error.issues)
+  }
+
+  return parsed.data
 }
 
 export function getProduct(id: string) {
-  return request<Product>(`/api/products/${id}`)
+  return request(`/api/products/${id}`, productSchema)
 }
 
 export function createProduct(payload: ProductPayload) {
-  return request<Product>('/api/products', {
+  return request('/api/products', productSchema, {
     method: 'POST',
     body: JSON.stringify(payload),
   })
 }
 
 export function updateProduct(id: string, payload: ProductPayload) {
-  return request<Product>(`/api/products/${id}`, {
+  return request(`/api/products/${id}`, productSchema, {
     method: 'PUT',
     body: JSON.stringify(payload),
   })

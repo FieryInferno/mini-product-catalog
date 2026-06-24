@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { ProductForm } from '@/components/products/product-form'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { getProduct, updateProduct } from '@/lib/api'
-import type { ProductPayload } from '@/types/product'
+import type { ProductPayload } from '@/models/product.model'
 
 export function EditProductPage() {
   const navigate = useNavigate()

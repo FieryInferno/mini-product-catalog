@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import type { ProductPayload } from '@/types/product'
+import type { ProductPayload } from '@/models/product.model'
 
 type ProductFormProps = {
   title: string

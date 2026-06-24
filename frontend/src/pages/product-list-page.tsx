@@ -1,53 +1,40 @@
 import { Search } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { Pagination } from '@/components/pagination'
 import { ProductList } from '@/components/products/product-list'
-import { ProductDialog } from '@/components/products/product-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { listProducts } from '@/lib/api'
+import { useProductsQuery } from '@/hooks/product.hook'
 import { useDebounce } from '@/lib/use-debounce'
-import type { Product } from '@/types/product'
+import type { Product } from '@/models/product.model'
 
 const LIMIT = 10
+const ProductDialog = lazy(async () => {
+  const module = await import('@/components/products/product-dialog')
+  return { default: module.ProductDialog }
+})
 
 export function ProductListPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
-  const [products, setProducts] = useState<Product[]>([])
-  const [total, setTotal] = useState(0)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   const debouncedSearch = useDebounce(search)
+  const { data, error, isLoading } = useProductsQuery({
+    search: debouncedSearch,
+    page,
+    limit: LIMIT,
+  })
 
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
 
-  useEffect(() => {
-    async function loadProducts() {
-      setLoading(true)
-      setError(null)
-      try {
-        const response = await listProducts({ search: debouncedSearch, page, limit: LIMIT })
-        setProducts(response.data)
-        setTotal(response.total)
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to fetch products'
-        setError(message)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    void loadProducts()
-  }, [debouncedSearch, page])
-
+  const products = data?.data ?? []
+  const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / LIMIT))
   const pages = useMemo(() => {
     const output: number[] = []
@@ -80,8 +67,8 @@ export function ProductListPage() {
 
       <ProductList
         products={products}
-        isLoading={loading}
-        error={error}
+        isLoading={isLoading}
+        error={error instanceof Error ? error.message : null}
         onProductSelect={setSelectedProduct}
         onEditProduct={(productId) => navigate(`/edit/${productId}`)}
       />
@@ -95,13 +82,15 @@ export function ProductListPage() {
         onPageChange={setPage}
       />
 
-      <ProductDialog
-        open={Boolean(selectedProduct)}
-        product={selectedProduct}
-        onOpenChange={(value) => {
-          if (!value) setSelectedProduct(null)
-        }}
-      />
+      <Suspense fallback={null}>
+        <ProductDialog
+          open={Boolean(selectedProduct)}
+          product={selectedProduct}
+          onOpenChange={(value) => {
+            if (!value) setSelectedProduct(null)
+          }}
+        />
+      </Suspense>
     </div>
   )
 }
