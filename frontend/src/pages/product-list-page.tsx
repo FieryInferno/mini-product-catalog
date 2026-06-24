@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react'
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { Pagination } from '@/components/pagination'
@@ -18,9 +18,9 @@ const ProductDialog = lazy(async () => {
 
 export function ProductListPage() {
   const navigate = useNavigate()
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   const debouncedSearch = useDebounce(search)
   const { data, error, isLoading } = useProductsQuery({
@@ -34,17 +34,7 @@ export function ProductListPage() {
   }, [debouncedSearch])
 
   const products = data?.data ?? []
-  const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT))
-  const pages = useMemo(() => {
-    const output: number[] = []
-    const start = Math.max(1, page - 2)
-    const end = Math.min(totalPages, page + 2)
-    for (let i = start; i <= end; i++) {
-      output.push(i)
-    }
-    return output
-  }, [page, totalPages])
+  const totalPages = data?.total_pages ?? 0
 
   return (
     <div className="space-y-6">
@@ -76,7 +66,6 @@ export function ProductListPage() {
       <Pagination
         page={page}
         totalPages={totalPages}
-        pages={pages}
         onPrevious={() => setPage((prev) => Math.max(1, prev - 1))}
         onNext={() => setPage((prev) => Math.min(totalPages, prev + 1))}
         onPageChange={setPage}

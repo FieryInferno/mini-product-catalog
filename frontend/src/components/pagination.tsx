@@ -6,11 +6,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
+import { useMemo } from 'react'
 
 type PaginationProps = {
   page: number
   totalPages: number
-  pages: number[]
   onPrevious: () => void
   onNext: () => void
   onPageChange: (page: number) => void
@@ -19,11 +19,22 @@ type PaginationProps = {
 export function Pagination({
   page,
   totalPages,
-  pages,
   onPrevious,
   onNext,
   onPageChange,
 }: PaginationProps) {
+  if (totalPages <= 1) return null
+
+  const pages = useMemo(() => {
+    const output: number[] = []
+    const start = Math.max(1, page - 2)
+    const end = Math.min(totalPages, page + 2)
+
+    for (let i = start; i <= end; i++) output.push(i)
+
+    return output
+  }, [page, totalPages])
+
   return (
     <PaginationComponent>
       <PaginationContent>

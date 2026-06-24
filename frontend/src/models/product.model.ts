@@ -19,7 +19,7 @@ export const productPayloadSchema = productSchema.pick({
 
 export const productListResponse = z.object({
   data: z.array(productSchema),
-  total: z.number(),
+  total_pages: z.number(),
   page: z.number(),
   limit: z.number(),
 })
