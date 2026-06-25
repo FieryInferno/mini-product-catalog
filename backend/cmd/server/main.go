@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
 
 type healthResponse struct {
@@ -28,15 +29,32 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Use(jsonMiddleware)
-	router.Use(corsMiddleware)
 
 	router.HandleFunc("/health", healthHandler).Methods(http.MethodGet)
 	handler := handlers.NewProductHandler(db)
 	handler.RegisterRoutes(router)
 
 	port := getEnv("PORT", "8080")
+	origins := getEnv("CORS_ALLOWED_ORIGINS", "*")
+
+	if origins == "*" {
+		log.Println("WARNING: CORS_ALLOWED_ORIGINS is set to '*', allowing all origins. This is not recommended for production.")
+	}
+
 	log.Printf("backend listening on :%s", port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins: []string{origins},
+		AllowedMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowedHeaders: []string{"Content-Type"},
+	})
+
+	if err := http.ListenAndServe(":"+port, corsHandler.Handler(router)); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
 }
@@ -76,19 +94,6 @@ func healthHandler(w http.ResponseWriter, _ *http.Request) {
 func jsonMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		next.ServeHTTP(w, r)
-	})
-}
-
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		next.ServeHTTP(w, r)
 	})
 }

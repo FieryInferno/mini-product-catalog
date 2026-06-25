@@ -33,6 +33,7 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=products
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173
     volumes:
       - ./backend:/app
       - /go/pkg/mod
