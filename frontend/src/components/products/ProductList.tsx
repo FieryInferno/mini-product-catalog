@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { PackageOpen } from 'lucide-react'
 
-import { ErrorAlert } from '@/components/alert'
+import { ErrorAlert } from '@/components/Alert'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'

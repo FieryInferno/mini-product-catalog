@@ -3,7 +3,7 @@ import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
 import { AddProductPage } from '@/pages/add-product-page'
 import { EditProductPage } from '@/pages/edit-product-page'
-import { ProductListPage } from '@/pages/product-list-page'
+import { ProductListPage } from '@/pages/ProductListPage'
 
 function App() {
   return (
