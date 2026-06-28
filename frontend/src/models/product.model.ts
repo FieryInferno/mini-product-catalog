@@ -19,9 +19,16 @@ export const productPayloadSchema = productSchema.pick({
 
 export const productListResponse = z.object({
   data: z.array(productSchema),
-  total_pages: z.number(),
-  page: z.number(),
-  limit: z.number(),
+  message: z.string(),
+  success: z.boolean(),
+  pagination: z.object({
+    current_page: z.number(),
+    has_next: z.boolean(),
+    has_prev: z.boolean(),
+    per_page: z.number(),
+    total_items: z.number(),
+    total_pages: z.number(),
+  })
 })
 
 export type Product = z.infer<typeof productSchema>
